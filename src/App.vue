@@ -1,30 +1,103 @@
-<template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+<template class="template">
+<div class="app container">
+    <div class="todoApp">
+        <h1>To-Do Now</h1>
+        <Postform @createNewPost="createPosts"/>
+        <Post v-for="post in posts" :post="post" :key="post.id" @delete="deleteLi" @update-status="updateCheckedStatus"/>
+    </div>
+</div>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<script>
+import Postform from './Companents/Postform.vue'
+import Post from './Companents/Post.vue'
+export default{
+    components:{
+       Postform, Post
+    },
+    data(){
+        return {
+            posts: [
+                {id: 1, title: 'Hello world', status:false},
+            ],
+        }
+    },
+    mounted() {
+        this.loadInformation();
+    },
+
+    methods: {
+        createPosts(inputValue) {
+            const newPost = {
+                id: Date.now(),
+                title: inputValue,
+                status: false
+            }
+            this.posts.push(newPost);
+            this.saveInformation()
+        },
+
+        deleteLi(id){
+            this.posts = this.posts.filter(post => post.id !== id);
+            this.saveInformation()
+        },
+
+        updateCheckedStatus(id) {
+            const post = this.posts.find(post => post.id === id);
+            if(post.status === false){
+                post.status = true;
+            } else {
+                post.status = false;
+            }
+            this.saveInformation()
+        },
+
+        saveInformation(){
+            let todoListStringify = JSON.stringify(this.posts);
+            localStorage.setItem('toDoList', todoListStringify);
+        },
+
+        loadInformation() {
+            const todoListStringify = localStorage.getItem('toDoList');
+            if(todoListStringify){
+                this.posts = JSON.parse(todoListStringify);
+            }
+        }
+        
+    }
+}      
+</script>
+
+<style lang="scss" scoped>
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-nav {
-  padding: 30px;
+.container{
+    width: 100%;
+    height: 100vh;
+    background-color: #2C2C2C;
+}
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+.todoApp{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+h1{
+    font-family: 'Racing Sans One', cursive;
+    font-size: 64px;
+    color: white;
+
+    text-transform: uppercase;
+
+    padding: 53px;
+    margin-bottom: 30px;
+
+    border-bottom: 1px solid white;
 }
 </style>
